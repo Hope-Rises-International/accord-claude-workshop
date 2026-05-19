@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude at Accord — A 90-Minute Workshop</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #1A7A7A; --teal-light: #E8F4F4; --teal-dark: #0F5555;
+    --gold: #C68A35; --gold-light: #F9F0E3;
+    --dark: #2C3E50; --text: #3A3A3A; --bg: #FAFAF8;
+    --white: #FFFFFF; --border: #E0E0DD;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; }
+  .site-header { background: var(--white); border-bottom: 3px solid var(--teal); padding: 24px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-img { height: 52px; width: auto; }
+  .header-label { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); background: var(--teal-light); padding: 6px 16px; border-radius: 20px; }
+  .hero { background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, #2A9D8F 100%); color: var(--white); padding: 80px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); border-radius: 50%; }
+  .hero-badge { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 6px 20px; border-radius: 20px; margin-bottom: 24px; }
+  .hero h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  .hero p { font-size: 18px; opacity: 0.9; max-width: 640px; margin: 0 auto; line-height: 1.6; }
+  .module-nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 32px; position: sticky; top: 103px; z-index: 40; }
+  .module-nav-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 0; overflow-x: auto; }
+  .module-nav a { display: block; padding: 16px 20px; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; white-space: nowrap; border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .module-nav a:hover { color: var(--teal); border-bottom-color: var(--teal); }
+  .content { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+  .module-section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  .module-section:last-child { border-bottom: none; }
+  .module-number { display: inline-block; font-family: var(--serif); font-size: 14px; font-weight: 700; color: var(--teal); background: var(--teal-light); width: 36px; height: 36px; line-height: 36px; text-align: center; border-radius: 50%; margin-bottom: 12px; }
+  .module-section h2 { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--dark); margin-bottom: 8px; line-height: 1.25; }
+  .module-section .principle { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--teal); margin-bottom: 24px; padding-left: 16px; border-left: 3px solid var(--teal-light); }
+  .module-section p { margin-bottom: 16px; }
+  .module-section strong { color: var(--dark); }
+  .module-section h3 { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--dark); margin: 32px 0 12px; }
+  .module-section ul, .module-section ol { margin: 8px 0 16px 20px; }
+  .module-section li { margin-bottom: 8px; }
+  .callout { background: var(--teal-light); border-left: 4px solid var(--teal); padding: 20px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .callout-gold { background: var(--gold-light); border-left-color: var(--gold); }
+  .callout h4 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin-bottom: 8px; }
+  .callout-gold h4 { color: var(--gold); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+  .compare-box { padding: 20px; border-radius: 8px; font-size: 15px; }
+  .compare-box.weak { background: #FFF5F5; border: 1px solid #FED7D7; }
+  .compare-box.strong { background: #F0FFF4; border: 1px solid #C6F6D5; }
+  .compare-box .label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .compare-box.weak .label { color: #C53030; }
+  .compare-box.strong .label { color: #276749; }
+  .prompt-box { background: #F5F5F0; border: 2px solid var(--teal); border-radius: 8px; padding: 24px; margin: 24px 0; font-family: 'DM Sans', monospace; font-size: 15px; color: var(--dark); line-height: 1.6; position: relative; }
+  .prompt-box::before { content: 'COPY-PASTE PROMPT'; position: absolute; top: -10px; left: 16px; background: var(--teal); color: white; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 2px 12px; border-radius: 4px; font-family: var(--sans); }
+  .step-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .step-box .step-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+  .takeaway-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  @media (max-width: 640px) { .takeaway-grid { grid-template-columns: 1fr; } }
+  .takeaway-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+  .takeaway-card h4 { font-family: var(--serif); font-size: 17px; color: var(--teal-dark); margin-bottom: 8px; }
+  .window-diagram { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 24px 0; }
+  .window-diagram .bar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; margin: 12px 0 8px; }
+  .window-diagram .bar span { display: block; font-size: 11px; font-weight: 700; color: var(--white); text-align: center; line-height: 28px; letter-spacing: 1px; text-transform: uppercase; }
+  .window-diagram .seg-system { background: #5B7A99; flex: 0 0 8%; }
+  .window-diagram .seg-files { background: #1A7A7A; flex: 0 0 18%; }
+  .window-diagram .seg-history { background: #C68A35; flex: 0 0 42%; }
+  .window-diagram .seg-tools { background: #9B7C4F; flex: 0 0 16%; }
+  .window-diagram .seg-free { background: #E0E0DD; flex: 0 0 16%; color: #666; }
+  .window-diagram .legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; margin-top: 12px; }
+  .window-diagram .legend span { display: flex; align-items: center; gap: 6px; }
+  .window-diagram .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; }
+  .site-footer { background: var(--dark); color: rgba(255,255,255,0.6); text-align: center; padding: 40px 32px; font-size: 14px; }
+  .site-footer strong { color: rgba(255,255,255,0.9); }
+  .site-footer a { color: rgba(255,255,255,0.8); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <img src="hri_logo.png" alt="Hope Rises International" class="logo-img">
+    <span class="header-label">Claude Workshop · Accord Edition</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-badge">Accord Network · 90-Minute Workshop</div>
+  <h1>Claude at Accord</h1>
+  <p>A live, hands-on workshop that takes you from a blank Claude chat to a working Accord project — with real documents, a system prompt, connected tools, a clear understanding of Claude&rsquo;s memory, and a personal skill you build before you walk out.</p>
+</section>
+
+<nav class="module-nav">
+  <div class="module-nav-inner">
+    <a href="#setup">Setup</a>
+    <a href="#m1">Models</a>
+    <a href="#m2">Context</a>
+    <a href="#m3">System Prompt</a>
+    <a href="#m4">Connected Tools</a>
+    <a href="#m5">Context Window</a>
+    <a href="#m6">Capture a Skill</a>
+    <a href="#takeaways">Takeaways</a>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- SETUP -->
+  <section class="module-section" id="setup">
+    <div class="module-number">&#10022;</div>
+    <h2>Before We Start</h2>
+    <p class="principle">One real task runs through the whole workshop. Each block adds a layer. By the end, you have a working Accord project workspace, an understanding of why Claude sometimes forgets things, and a personal skill that captures what worked today.</p>
+
+    <p><strong>What you&rsquo;ll build:</strong> A board-ready summary of Accord&rsquo;s Principles of Practice &mdash; starting from nothing, then grounded in your real documents, then voiced in Accord&rsquo;s tone. Along the way you&rsquo;ll connect Claude to Gmail and Drive, learn how Claude&rsquo;s memory actually works, and capture one workflow as a reusable skill.</p>
+
+    <p><strong>What you need open:</strong> Two browser tabs. One for <strong>claude.ai</strong> (sign in to your usual Claude account). One for <strong>accordnetwork.org/about</strong> &mdash; we&rsquo;ll be downloading two documents from there.</p>
+
+    <div class="callout">
+      <h4>How this workshop runs</h4>
+      <p>Six blocks. Most are 10&ndash;15 minutes. We don&rsquo;t do theory first &mdash; concepts get introduced as they come up in the work. If something is unclear, raise it in the moment. If your screen does something different than mine, raise that too &mdash; Claude varies, and that&rsquo;s part of the lesson.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>The one idea behind today</h4>
+      <p>You&rsquo;re learning to <strong>direct</strong> work, not do it. Claude is a brilliant new hire with two PhDs who doesn&rsquo;t know where the bathroom is. Today is about teaching it where the bathroom is &mdash; and once you do, it can do real work for Accord at a pace one person couldn&rsquo;t.</p>
+    </div>
+
+    <h3>The two documents we&rsquo;ll use</h3>
+    <ul>
+      <li><strong>Principles of Practice</strong> &mdash; Accord&rsquo;s 11-principle operational framework. Download from <em>accordnetwork.org/about</em> (Principles section).</li>
+      <li><strong>Accord GIK Standards (2019)</strong> &mdash; Seven Gifts-in-Kind standards. Same page.</li>
+    </ul>
+    <p>Save both PDFs somewhere easy to find. You&rsquo;ll upload them in Block 2.</p>
+  </section>
+
+  <!-- BLOCK 1 -->
+  <section class="module-section" id="m1">
+    <div class="module-number">1</div>
+    <h2>Same Prompt, Two Models</h2>
+    <p class="principle">The better model isn&rsquo;t smarter &mdash; it&rsquo;s more honest about what it doesn&rsquo;t know.</p>
+
+    <p>We&rsquo;re going to run the same prompt twice, on two different models, with no documents uploaded. Just a blank chat. The point is to see what Claude does with the same question before any Accord knowledge is added &mdash; and to feel the difference between a fast model and a thoughtful one.</p>
+
+    <div class="prompt-box">Write a one-page briefing for a new board member on the Accord Network&rsquo;s Principles of Practice. Cover what the document is, why it exists, the 11 principles, and how member organizations use it. Tone: professional, mission-aware, board-appropriate. One page maximum.</div>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Sonnet 4.6</div>
+      <p>Open a new chat. Click the model selector and choose <strong>Sonnet 4.6</strong>. Paste the prompt. Read the output. It will be confident, well-structured, and at least partly invented &mdash; because Sonnet doesn&rsquo;t have your Principles document in front of it. It&rsquo;ll guess from what it knows about Christian relief networks in general.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Opus 4.7 Adaptive</div>
+      <p>Start a new chat. Select <strong>Opus 4.7 Adaptive</strong> &mdash; this is the current top-tier model. &ldquo;Adaptive&rdquo; means it automatically decides how hard to think based on the question: fast on easy ones, slow and careful on hard ones. Same prompt. Watch what happens &mdash; Opus may pause and search the web, find <em>accordnetwork.org</em>, pull real text, and cite it. You can click the thinking panel to watch its reasoning unfold.</p>
+    </div>
+
+    <h3>What you should notice</h3>
+    <div class="compare">
+      <div class="compare-box weak">
+        <div class="label">&#10007; Sonnet, no context</div>
+        Confident, plausible, partially wrong. Invents principle names, guesses founding year, generalizes. Reads like a generic faith-based nonprofit primer.
+      </div>
+      <div class="compare-box strong">
+        <div class="label">&#10003; Opus 4.7 Adaptive, no context</div>
+        Pauses, searches, finds the real source, grounds the briefing in actual principle names with citations. Slower, more honest, more useful.
+      </div>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Factory knowledge &mdash; the new MacBook</h4>
+      <p>Both models have absorbed millions of books, articles, and websites. That&rsquo;s why each produced something plausible without any documents. But factory knowledge is generic &mdash; it knows about Christian relief networks, not about <em>Accord</em> specifically. That&rsquo;s what we fix next.</p>
+    </div>
+
+    <div class="callout">
+      <h4>When to use which</h4>
+      <p><strong>Sonnet 4.6</strong> is your everyday workhorse &mdash; fast, capable, fine for most tasks once you&rsquo;ve given it context. <strong>Opus 4.7 Adaptive</strong> is your heavy-lifter for research, complex analysis, and first drafts of important documents. It costs more (in tokens, in your plan&rsquo;s limits), so save it for when quality matters most.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 2 -->
+  <section class="module-section" id="m2">
+    <div class="module-number">2</div>
+    <h2>Context Changes Everything</h2>
+    <p class="principle">A Sonnet with real documents beats an Opus with none. Context is the difference between guessing and knowing.</p>
+
+    <p>Now we give Claude your actual source material and re-run the same prompt. You&rsquo;ll see the output transform &mdash; same model, same question, dramatically better result.</p>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Create a project</div>
+      <p>In the left sidebar of Claude, click <strong>Projects</strong> &rarr; <strong>Create New Project</strong>. Name it <strong>&ldquo;Accord Network.&rdquo;</strong> A project is a persistent workspace &mdash; documents you add stay available across every chat inside it.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Upload the two documents</div>
+      <p>In the project, find the <strong>Files</strong> section. Drag <strong>Principles of Practice</strong> and <strong>Accord GIK Standards</strong> in (or click + and upload from device). Drop them <em>into the project</em>, not into a chat.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Step 3 &mdash; Re-run the prompt</div>
+      <p>Start a new chat <strong>inside the project</strong>. Stay on <strong>Sonnet 4.6</strong> &mdash; we&rsquo;re proving you don&rsquo;t need Opus when you have real documents loaded. Paste the same board-member briefing prompt. Run it.</p>
+    </div>
+
+    <h3>What you should see</h3>
+    <p>The briefing now uses the actual principle names in the actual order. It quotes Accord&rsquo;s own framing. It can reference specific sub-points (program staff care, indigenous empowerment, GIK valuation discipline) that it had no way to know in Block 1. The fabrication risk is gone because the source is in the room.</p>
+
+    <div class="callout">
+      <h4>Context = the USB drive</h4>
+      <p>Think of Claude as a new MacBook. Its training data is the factory software &mdash; broad and capable but generic. When you upload documents into a project, you&rsquo;re plugging in a USB drive. While the chat is inside that project, Claude can read everything on the drive. Start a chat outside the project, the drive&rsquo;s unplugged. That&rsquo;s what projects are for: keeping the drive connected.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>File format matters</h4>
+      <p>Plain text and Word docs go in cleanly. PDFs work but lose accuracy &mdash; especially scanned ones. Excel works if structure is clean (single header row, no merged cells). For anything you want Claude to do <em>math</em> on, never send a PDF if you can send the source file. For documents and text, PDF is usually fine but DOCX is better.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Three Claude habits to know about</h4>
+      <p><strong>It won&rsquo;t volunteer its full capability.</strong> If you tell it to write a one-page brief, it writes a one-page brief &mdash; even if it could also format it, send it, and file it. Ask for more, and you usually get more.</p>
+      <p><strong>It accepts the limits you imply.</strong> If you frame a question narrowly, it answers narrowly. Stepping back and saying &ldquo;what are we missing here?&rdquo; often unlocks better thinking.</p>
+      <p><strong>It will jump to writing before specifying.</strong> If the deliverable is important, ask Claude to draft a spec or outline first, then write. The five extra minutes saves rework.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 3 -->
+  <section class="module-section" id="m3">
+    <div class="module-number">3</div>
+    <h2>A System Prompt: Set the Rules Once</h2>
+    <p class="principle">Documents give Claude the facts. A system prompt gives Claude the rules &mdash; your tone, your framing, your guardrails. You set it once and it applies to every conversation in the project.</p>
+
+    <p>Right now every new chat in your Accord project starts the same way: helpful but generic. Claude doesn&rsquo;t know how Accord talks, what to never say, who you are to your members. We fix that with a system prompt &mdash; instructions that load at the top of every conversation in the project.</p>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Add the system prompt</div>
+      <p>In your Accord Network project, click the project settings (gear icon, or &ldquo;Edit Project&rdquo;). Find the <strong>Instructions</strong> field. Paste the prompt below. Save.</p>
+    </div>
+
+    <div class="prompt-box">You are writing on behalf of the Accord Network, an association of 160+ Christ-centered relief and development organizations founded in 1977. We serve member organizations &mdash; we don&rsquo;t direct them.
+
+Voice: professional, collaborative, rooted in shared evangelical conviction without being preachy. Confident about our role as a convener, humble about our members&rsquo; expertise on the ground.
+
+When summarizing or referencing our Principles of Practice or GIK Standards, draw from the uploaded documents &mdash; never from memory or general knowledge. Never fabricate statistics or attribute outcomes to specific member organizations unless those outcomes are in the source documents.
+
+Use &ldquo;member organizations&rdquo; rather than &ldquo;clients,&rdquo; &ldquo;partners,&rdquo; or &ldquo;customers.&rdquo; Use &ldquo;the network&rdquo; when referring to Accord collectively.</div>
+
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Re-run the prompt one more time</div>
+      <p>Start a new chat inside the same project. Paste the same board-member briefing prompt. Compare this output to the version from Block 2.</p>
+    </div>
+
+    <h3>What changes</h3>
+    <p>The tone tightens. The word &ldquo;member organizations&rdquo; appears where Claude might have said &ldquo;partners&rdquo; before. Claude is more careful about which claims it makes &mdash; because you told it not to fabricate. The voice starts to feel like Accord wrote it, not like a generic AI wrote about Accord.</p>
+
+    <div class="callout-gold">
+      <h4>The G-C-A-O formula</h4>
+      <p>Most prompting frameworks boil down to four ingredients: <strong>G</strong>oal (what you want), <strong>C</strong>ontext (what Claude needs to know), <strong>A</strong>ction (what role to play), <strong>O</strong>utput (what format). Your system prompt handles the C and A permanently. Your day-to-day prompts only need the G and the O. You stop repeating yourself.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 4 -->
+  <section class="module-section" id="m4">
+    <div class="module-number">4</div>
+    <h2>Connected Tools: Bring Claude to Your Work</h2>
+    <p class="principle">You don&rsquo;t move data to Claude. Claude comes to where your data already lives.</p>
+
+    <p>So far you&rsquo;ve been uploading documents by hand. That works, but you&rsquo;re the courier. Connectors eliminate that step &mdash; once Gmail and Google Drive are connected, Claude can search your inbox, read documents in your Drive, and create new files there directly.</p>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Connect Gmail and Drive</div>
+      <p>Go to <strong>Settings &rarr; Connectors &rarr; Browse connectors</strong>. Click to connect <strong>Gmail</strong> and <strong>Google Drive</strong>. Each opens a Google authorization popup &mdash; approve the permissions. If a popup doesn&rsquo;t appear, check for a &ldquo;popup blocked&rdquo; indicator in your browser&rsquo;s address bar.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Verify</div>
+      <p>Start a new chat. Below the prompt bar, you should see icons for <strong>From Drive</strong>, <strong>From Calendar</strong>, and <strong>From Gmail</strong>. If they&rsquo;re there, your connections are live.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Step 3 &mdash; Gmail in action</div>
+      <p>Think of a recent email thread with multiple participants &mdash; an onboarding discussion, a workshop planning thread, a member-services exchange. In your Accord project, paste:</p>
+    </div>
+
+    <div class="prompt-box">Search my Gmail for the most recent thread about [your topic]. Summarize who was involved, what was discussed, and what action items are still outstanding. Then draft a brief follow-up email to the participants asking for status updates on the open items.</div>
+
+    <p>Claude searches your inbox, returns a summary, and drops a draft into your Gmail drafts folder. Check it before sending &mdash; but the heavy lifting is done.</p>
+
+    <div class="step-box">
+      <div class="step-label">Step 4 &mdash; Drive in action</div>
+      <p>Now ask Claude to find and use a document from your Drive:</p>
+    </div>
+
+    <div class="prompt-box">Find the most recent version of our annual report or member-services overview in my Google Drive. Based on it, write a 200-word elevator pitch for a prospective member organization considering joining the network. Use our Principles of Practice as background for the tone.</div>
+
+    <p>Notice what just happened: Claude searched Drive, read the document, combined it with your uploaded Principles of Practice, and produced something new &mdash; all in one prompt.</p>
+
+    <div class="callout-gold">
+      <h4>One rule for everything Claude creates</h4>
+      <p>Documents you create with Claude live inside the chat as <strong>artifacts</strong>. To make them real organizational knowledge, click the <strong>Drive icon</strong> on the artifact. It saves to your Drive. From there: if it&rsquo;s a working document, convert to Google Doc (File &rarr; Save as Google Docs) and move to the right Shared Drive folder. If it&rsquo;s a final deliverable, leave the format and move it. Either way, always move it. A document in My Drive disappears when you leave the org. A document in a Shared Drive becomes part of Accord.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 5 - CONTEXT WINDOW -->
+  <section class="module-section" id="m5">
+    <div class="module-number">5</div>
+    <h2>The Context Window: Claude&rsquo;s Working Memory</h2>
+    <p class="principle">Every conversation lives inside a fixed-size window of working memory. Once you understand what fills it, you stop getting blindsided when Claude slows down or starts losing the thread.</p>
+
+    <p>So far we&rsquo;ve been adding things to Claude&rsquo;s awareness: documents, a system prompt, connected tools, a back-and-forth chat history. All of that lives in one place &mdash; the <strong>context window</strong>. It&rsquo;s the amount of text Claude can actively hold in mind during a conversation. About 200,000 tokens, which sounds enormous, until you start filling it.</p>
+
+    <h3>What&rsquo;s actually in the window right now</h3>
+    <div class="window-diagram">
+      <div class="bar" aria-label="Context window composition">
+        <span class="seg-system">SYSTEM</span>
+        <span class="seg-files">FILES</span>
+        <span class="seg-history">CHAT HISTORY</span>
+        <span class="seg-tools">TOOL CALLS</span>
+        <span class="seg-free">FREE</span>
+      </div>
+      <div class="legend">
+        <span><i style="background:#5B7A99"></i>Your system prompt</span>
+        <span><i style="background:#1A7A7A"></i>Project files referenced</span>
+        <span><i style="background:#C68A35"></i>Everything you and Claude have said</span>
+        <span><i style="background:#9B7C4F"></i>Gmail/Drive results, search output</span>
+        <span><i style="background:#E0E0DD;border:1px solid #ccc"></i>Room left to think</span>
+      </div>
+    </div>
+
+    <p>The chat history is the part most people don&rsquo;t feel growing. Every message you send and every response Claude gives gets carried forward into the next turn. After ten turns of back-and-forth, your &ldquo;simple&rdquo; chat is carrying ten turns of context every time it answers.</p>
+
+    <h3>The accumulation trap</h3>
+    <p>A long chat doesn&rsquo;t fail dramatically &mdash; it degrades quietly. You&rsquo;ll notice:</p>
+    <ul>
+      <li><strong>Responses get slower.</strong> Claude has more to chew on before answering.</li>
+      <li><strong>Earlier details get fuzzy.</strong> Something you said in turn three may not survive turn fifteen.</li>
+      <li><strong>Quality drifts.</strong> Claude starts repeating itself or contradicting earlier work.</li>
+      <li><strong>You hit a wall.</strong> Eventually you see a &ldquo;long conversation&rdquo; warning or the chat refuses to continue.</li>
+    </ul>
+
+    <p>Look at one of your chats from earlier in this workshop. The Block 4 chat probably already feels heavier than the Block 1 chat. That&rsquo;s the accumulation trap in action.</p>
+
+    <h3>Four escape routes</h3>
+
+    <div class="step-box">
+      <div class="step-label">Route 1 &mdash; Start a fresh chat in the same project</div>
+      <p>This is the most common move. Your project files and system prompt stay in place; only the back-and-forth history drops. You lose the working memory of <em>this conversation</em>, but you keep the foundation. <strong>If the chat is getting sluggish, start fresh.</strong></p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Route 2 &mdash; Summarize and paste forward</div>
+      <p>If the conversation has produced valuable thinking you don&rsquo;t want to lose, end the chat by asking Claude:</p>
+    </div>
+
+    <div class="prompt-box">Summarize this conversation as a handoff note for a fresh chat. Include: what we were trying to do, the key decisions we made, the documents and details Claude needs to pick up where we left off, and any open questions. Format it as a single block I can paste into a new chat.</div>
+
+    <p>Start a new chat, paste the summary as your first message, and continue. You&rsquo;ve compressed twenty turns into one.</p>
+
+    <div class="step-box">
+      <div class="step-label">Route 3 &mdash; Lean on the project, not the chat</div>
+      <p>The whole reason projects exist is so you don&rsquo;t have to carry knowledge in the chat itself. If something is going to be referenced repeatedly, put it in the <strong>Files</strong> section, not into the conversation. Files don&rsquo;t fill the chat history &mdash; Claude reads them on demand when relevant. Your back-and-forth stays lean.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Route 4 &mdash; Use Opus 4.7 Adaptive for the heaviest lifts</div>
+      <p>Adaptive mode chooses how deeply to think based on the question. On a complex task with a heavy context window, it allocates more thinking &mdash; which uses the available room more efficiently than a faster, shallower model would. When you&rsquo;ve got a lot loaded and you need a quality answer, Opus 4.7 Adaptive is the right tool.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>The mental model</h4>
+      <p>Think of the context window like a whiteboard. You can write on it, Claude can write on it, you can pin documents to it. But the whiteboard is a fixed size. Once it&rsquo;s full, something has to come off before something new goes on. Long chats fill the whiteboard. Fresh chats start with a clean one. Projects keep the important pinned items in place across every clean whiteboard.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Practical guideline</h4>
+      <p>If a chat has gone more than 15&ndash;20 substantive turns, or you notice responses slowing down, or Claude starts forgetting things you established earlier &mdash; that&rsquo;s your cue. Summarize, start fresh, and keep moving. Don&rsquo;t fight the window.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 6 - CAPTURE A SKILL -->
+  <section class="module-section" id="m6">
+    <div class="module-number">6</div>
+    <h2>Capture a Skill Before You Close Today</h2>
+    <p class="principle">Claude doesn&rsquo;t carry memory between sessions. A great result today may look completely different tomorrow. That&rsquo;s not a bug &mdash; it&rsquo;s two equally talented people at the same desk making different choices. A skill writes down what worked so it happens the same way next time.</p>
+
+    <p>You&rsquo;ve done five things today that worked. Pick one and turn it into a skill before you close the chat. Otherwise, the next time you try the same thing, you&rsquo;ll get something different &mdash; and you&rsquo;ll have to re-figure-out what to ask for.</p>
+
+    <h3>Pick what to capture</h3>
+    <p>Look back over today. Which of these gave you a result you&rsquo;d want to repeat exactly?</p>
+    <ul>
+      <li><strong>The board-member briefing format</strong> from Block 3 &mdash; structured, voiced, grounded in your documents.</li>
+      <li><strong>The Gmail summarize-and-draft workflow</strong> from Block 4 &mdash; thread &rarr; summary &rarr; follow-up draft, every time.</li>
+      <li><strong>The Drive-find-and-elevator-pitch workflow</strong> from Block 4 &mdash; find latest doc, combine with Principles, produce a 200-word pitch.</li>
+      <li><strong>The handoff summary pattern</strong> from Block 5 &mdash; capture a conversation as a paste-forward block for the next chat.</li>
+      <li><strong>Something else you discovered along the way</strong> &mdash; if a particular phrasing or sequence got you a result you loved, that&rsquo;s a skill waiting to be born.</li>
+    </ul>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Tell Claude what worked</div>
+      <p>Inside your Accord project, paste this and fill in the bracketed parts:</p>
+    </div>
+
+    <div class="prompt-box">I just successfully [describe what you did &mdash; the workflow, the prompt, the steps, what made it work well]. I want to build a personal skill that captures this workflow so it works reliably every time. Write the skill for me &mdash; include a clear name, a description of when to use it, the exact instructions Claude should follow, and any phrasing or formatting rules that matter. Name it [your chosen name, e.g. &ldquo;accord-member-briefing&rdquo;].</div>
+
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Save it to your skills</div>
+      <p>When Claude finishes drafting the skill, look for a <strong>Copy to your skills</strong> option, or download the skill file and install it via <strong>Settings &rarr; Capabilities &rarr; Skills &rarr; Customize</strong>. The skill now lives in your Claude account. The next time you start a chat and ask for that kind of work, Claude reaches for the skill automatically. If it doesn&rsquo;t, just say: <em>&ldquo;Use the [skill name] for this.&rdquo;</em></p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Personal skill today, team skill tomorrow</h4>
+      <p>The skill you just built is <strong>personal</strong> &mdash; only your Claude account uses it. That&rsquo;s the right place to start. Try it for a week. If it holds up across multiple uses, bring it to Cassie. On a Teams plan, an admin can promote a personal skill to a <strong>team skill</strong> &mdash; meaning every Accord staffer&rsquo;s Claude account picks it up automatically. That&rsquo;s how good individual work becomes organizational standard.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Style vs. skill vs. custom instructions</h4>
+      <p><strong>Style</strong> is your <em>voice</em> &mdash; how Claude writes (concise, formal, etc.). Applies across every conversation, set in Claude&rsquo;s settings.</p>
+      <p><strong>Skill</strong> is your <em>craft</em> &mdash; how Claude structures a specific deliverable. What you just built.</p>
+      <p><strong>Custom instructions</strong> are your <em>personal preferences</em> &mdash; how Claude should talk to you specifically. Lives in your own account settings.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Security note</h4>
+      <p>Don&rsquo;t download and install skill files from random websites. A skill is instructions Claude follows &mdash; an untrusted one could behave in unexpected ways. Build your own from your own work, or have Claude build them for you.</p>
+    </div>
+  </section>
+
+  <!-- TAKEAWAYS -->
+  <section class="module-section" id="takeaways">
+    <div class="module-number">&#10003;</div>
+    <h2>What You Built Today</h2>
+    <p class="principle">Same prompt, several different outcomes &mdash; from confident fabrication to a grounded, branded, Accord-voiced briefing. Plus a working understanding of Claude&rsquo;s memory and one captured skill you can use Monday morning.</p>
+
+    <div class="takeaway-grid">
+      <div class="takeaway-card">
+        <h4>Models matter &mdash; but context matters more</h4>
+        <p>Sonnet 4.6 is your daily driver. Opus 4.7 Adaptive is for the hardest jobs. Either way, a model without your documents is guessing.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Projects keep the USB drive plugged in</h4>
+        <p>Your Accord project now has the Principles of Practice and GIK Standards loaded. Every chat inside it starts with that knowledge available.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>System prompts set the rules once</h4>
+        <p>Tone, framing, words to never use &mdash; defined in Instructions, applied to every conversation. No more re-briefing.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Connectors put Claude where your work is</h4>
+        <p>Gmail and Drive connected. Searching, summarizing, drafting, and saving &mdash; all from one chat window, without tab-switching.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>The context window is a whiteboard</h4>
+        <p>It fills up. When it does, start a fresh chat in the same project. Summarize forward if there&rsquo;s thinking worth keeping. Lean on files, not chat history.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Skills make good work repeatable</h4>
+        <p>You captured one workflow today as a personal skill. When it proves out, Cassie can promote it to a team skill so everyone benefits.</p>
+      </div>
+    </div>
+
+    <h3>Troubleshooting</h3>
+    <div class="callout">
+      <p><strong>Connector toggled itself off?</strong> Open the + menu &rarr; Connectors and flip it back on. Known behavior, not your fault.</p>
+      <p><strong>Claude asking questions instead of writing?</strong> Add &ldquo;Don&rsquo;t ask clarifying questions &mdash; write your best version with what you have&rdquo; to the end of your prompt.</p>
+      <p><strong>Files won&rsquo;t upload?</strong> Drag them into the project&rsquo;s Files section, not into a chat. Or use the + icon in Files.</p>
+      <p><strong>Wrong document version returned from Drive?</strong> Be more specific in the prompt. Naming the year or version usually does it.</p>
+      <p><strong>Hit a tool-call or token limit?</strong> Click <strong>Continue</strong> if you see the button. Otherwise start a fresh chat in the same project &mdash; your documents, system prompt, and skill persist.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Your Monday-morning challenge</h4>
+      <p>This week, use your Accord Network project for one real task. Use the skill you just built. When the chat starts feeling heavy, summarize and start fresh. Bring the result &mdash; and a refined version of your skill &mdash; to Cassie. The skill that holds up across three real uses is the one worth deploying to the whole team.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p><strong>Hope Rises International</strong> &mdash; Claude Workshop curriculum, prepared for the Accord Network</p>
+  <p style="margin-top: 8px; font-size: 13px;">90-Minute Workshop · Facilitated live</p>
+</footer>
+
+</body>
+</html>
