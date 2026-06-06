@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude at Accord, Part 2 — From Assistant to Coworker</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #1A7A7A; --teal-light: #E8F4F4; --teal-dark: #0F5555;
+    --gold: #C68A35; --gold-light: #F9F0E3;
+    --dark: #2C3E50; --text: #3A3A3A; --bg: #FAFAF8;
+    --white: #FFFFFF; --border: #E0E0DD;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; }
+  .site-header { background: var(--white); border-bottom: 3px solid var(--teal); padding: 24px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+  .header-inner { max-width: 900px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-img { height: 52px; width: auto; }
+  .header-label { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); background: var(--teal-light); padding: 6px 16px; border-radius: 20px; }
+  .hero { background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 60%, #2A9D8F 100%); color: var(--white); padding: 80px 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); border-radius: 50%; }
+  .hero-badge { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 6px 20px; border-radius: 20px; margin-bottom: 24px; }
+  .hero h1 { font-family: var(--serif); font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  .hero p { font-size: 18px; opacity: 0.9; max-width: 660px; margin: 0 auto; line-height: 1.6; }
+  .module-nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 32px; position: sticky; top: 103px; z-index: 40; }
+  .module-nav-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 0; overflow-x: auto; }
+  .module-nav a { display: block; padding: 16px 20px; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; white-space: nowrap; border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .module-nav a:hover { color: var(--teal); border-bottom-color: var(--teal); }
+  .content { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+  .module-section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+  .module-section:last-child { border-bottom: none; }
+  .module-number { display: inline-block; font-family: var(--serif); font-size: 14px; font-weight: 700; color: var(--teal); background: var(--teal-light); width: 36px; height: 36px; line-height: 36px; text-align: center; border-radius: 50%; margin-bottom: 12px; }
+  .module-section h2 { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--dark); margin-bottom: 8px; line-height: 1.25; }
+  .module-section .principle { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--teal); margin-bottom: 24px; padding-left: 16px; border-left: 3px solid var(--teal-light); }
+  .module-section p { margin-bottom: 16px; }
+  .module-section strong { color: var(--dark); }
+  .module-section h3 { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--dark); margin: 32px 0 12px; }
+  .module-section ul, .module-section ol { margin: 8px 0 16px 20px; }
+  .module-section li { margin-bottom: 8px; }
+  .callout { background: var(--teal-light); border-left: 4px solid var(--teal); padding: 20px 24px; margin: 24px 0; border-radius: 0 8px 8px 0; }
+  .callout-gold { background: var(--gold-light); border-left-color: var(--gold); }
+  .callout h4 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin-bottom: 8px; }
+  .callout-gold h4 { color: var(--gold); }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+  .compare-box { padding: 20px; border-radius: 8px; font-size: 15px; }
+  .compare-box.weak { background: #FFF5F5; border: 1px solid #FED7D7; }
+  .compare-box.strong { background: #F0FFF4; border: 1px solid #C6F6D5; }
+  .compare-box .label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .compare-box.weak .label { color: #C53030; }
+  .compare-box.strong .label { color: #276749; }
+  .prompt-box { background: #F5F5F0; border: 2px solid var(--teal); border-radius: 8px; padding: 24px; margin: 24px 0; font-family: 'DM Sans', monospace; font-size: 15px; color: var(--dark); line-height: 1.6; position: relative; }
+  .prompt-box::before { content: 'COPY-PASTE PROMPT'; position: absolute; top: -10px; left: 16px; background: var(--teal); color: white; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 2px 12px; border-radius: 4px; font-family: var(--sans); }
+  .step-box { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .step-box .step-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+  .takeaway-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  @media (max-width: 640px) { .takeaway-grid { grid-template-columns: 1fr; } }
+  .takeaway-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+  .takeaway-card h4 { font-family: var(--serif); font-size: 17px; color: var(--teal-dark); margin-bottom: 8px; }
+  .loop-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+  @media (max-width: 700px) { .loop-grid { grid-template-columns: 1fr 1fr; } }
+  .loop-beat { background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--teal); border-radius: 8px; padding: 18px; text-align: center; }
+  .loop-beat .beat-num { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .loop-beat h4 { font-family: var(--serif); font-size: 18px; color: var(--dark); margin-bottom: 6px; }
+  .loop-beat p { font-size: 13px; line-height: 1.5; margin: 0; }
+  .data-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; }
+  .data-table th { background: var(--teal); color: var(--white); text-align: left; padding: 12px 16px; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+  .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .data-table tr:nth-child(even) td { background: var(--white); }
+  .data-table tr:nth-child(odd) td { background: #FCFCFB; }
+  .data-table strong { color: var(--teal-dark); }
+  .mem-silos { display: flex; align-items: center; gap: 8px; margin: 24px 0 4px; }
+  @media (max-width: 640px) { .mem-silos { flex-direction: column; } }
+  .mem-silo { flex: 1; background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--teal); border-radius: 8px; padding: 18px 14px; text-align: center; }
+  .mem-silo h5 { font-family: var(--serif); font-size: 15px; color: var(--dark); margin-bottom: 10px; line-height: 1.3; }
+  .mem-silo .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; padding: 4px 12px; border-radius: 20px; }
+  .mem-silo .pill.yes { background: #F0FFF4; border: 1px solid #C6F6D5; color: #276749; }
+  .mem-silo .pill.no { background: #FFF5F5; border: 1px solid #FED7D7; color: #C53030; }
+  .mem-divide { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px; color: #C53030; }
+  .mem-divide .x { width: 26px; height: 26px; line-height: 22px; text-align: center; border: 2px solid #C53030; border-radius: 50%; font-weight: 700; font-size: 13px; }
+  .mem-divide span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  @media (max-width: 640px) { .mem-divide { flex-direction: row; } }
+  .silo-caption { text-align: center; font-size: 13px; color: #777; margin: 0 0 8px; font-style: italic; }
+  .site-footer { background: var(--dark); color: rgba(255,255,255,0.6); text-align: center; padding: 40px 32px; font-size: 14px; }
+  .site-footer strong { color: rgba(255,255,255,0.9); }
+  .site-footer a { color: rgba(255,255,255,0.8); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <img src="hri_logo.png" alt="Hope Rises International" class="logo-img">
+    <span class="header-label">Claude Workshop · Accord Edition · Part 2</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-badge">Accord Network · 90-Minute Workshop · Part 2</div>
+  <h1>From Assistant to Coworker</h1>
+  <p>Part 1 taught Claude who Accord is. Part 2 is about working like a pro: ask the right way, teach Claude to get better at working with you, combine tools, hand off a whole task to an AI coworker, and keep a clean workshop so it all scales.</p>
+  <p style="margin-top:24px"><a href="index.html" style="display:inline-block;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);padding:10px 24px;border-radius:8px;text-decoration:none;">&larr; Back to Part 1 — Claude at Accord</a></p>
+</section>
+
+<nav class="module-nav">
+  <div class="module-nav-inner">
+    <a href="#setup">Recap</a>
+    <a href="#m1">Describe the Friction</a>
+    <a href="#m2">Big Problems</a>
+    <a href="#m3">Combine Tools</a>
+    <a href="#m4">Why Cowork</a>
+    <a href="#m5">Keep It Clean</a>
+    <a href="#takeaways">Takeaways</a>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- SETUP -->
+  <section class="module-section" id="setup">
+    <div class="module-number">&#10022;</div>
+    <h2>Where We Left Off</h2>
+    <p class="principle">Part 1 was about teaching Claude where the bathroom is. Part 2 is about handing it real work and trusting the result.</p>
+
+    <p><strong>What you already have from Part 1:</strong> an <em>Accord Network</em> project with the Principles of Practice and GIK Standards loaded, a system prompt that gives Claude Accord&rsquo;s voice, Gmail and Drive connected, an understanding of the context window, and at least one personal skill you built.</p>
+
+    <p><strong>What today adds:</strong> the five habits that separate someone who <em>uses</em> Claude from someone who uses it <em>well</em>. Each block builds on the one before it.</p>
+
+    <div class="callout-gold">
+      <h4>The through-line of everything today</h4>
+      <p><strong>You own the outcome. The AI does the in-between.</strong> That single idea runs under all five blocks. You decide what good looks like, you review the work, and you keep the system clean. Claude handles the gathering, drafting, formatting, and clicking in the middle.</p>
+    </div>
+
+    <div class="callout">
+      <h4>What you need open</h4>
+      <p>Two things: <strong>claude.ai</strong> in your browser (on the Accord team account), and the <strong>Claude desktop app</strong> for the Cowork block later. Your <em>Accord Network</em> project from Part 1 should be right where you left it.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 1 - FRICTION -->
+  <section class="module-section" id="m1">
+    <div class="module-number">1</div>
+    <h2>Describe the Friction, Not the Solution</h2>
+    <p class="principle">When you don&rsquo;t know how to solve something, the temptation is to guess at a solution and ask Claude to build that. It almost always backfires. Describe what&rsquo;s <em>hard</em> instead, and let Claude shape the answer.</p>
+
+    <p>This is the single most important habit when you sit down with Claude. The instinct is to walk in with a solution already in mind &mdash; &ldquo;build me a dashboard,&rdquo; &ldquo;make me a database.&rdquo; But the moment you name a solution, you&rsquo;ve locked Claude into your guess about what&rsquo;s possible. Describe the friction, and you open the whole solution space.</p>
+
+    <h3>Same situation, two ways to ask</h3>
+    <div class="compare">
+      <div class="compare-box weak">
+        <div class="label">&#10007; Solution-shaped</div>
+        &ldquo;Build me a grants-management database with a calendar view and email reminders.&rdquo;
+        <br><br>Locks the answer in before the conversation starts. You end up debugging a tool you may not have needed.
+      </div>
+      <div class="compare-box strong">
+        <div class="label">&#10003; Friction-shaped</div>
+        &ldquo;We have grants from 14 funders this year. Each has a different reporting deadline and format. Last quarter I missed one because it was buried in an email thread. I have no central place that tells me what&rsquo;s due when.&rdquo;
+        <br><br>Describes what&rsquo;s real. Now Claude can push back, refine, or suggest something you&rsquo;d never have asked for.
+      </div>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Try it now &mdash; your real friction</div>
+      <p>Open a chat in your Accord project. Think of one thing in your week that&rsquo;s slow, manual, or brittle &mdash; member onboarding, convening logistics, chasing data from member orgs, prepping the OneAccord Forum, the CRDA Journal pipeline. Describe it the way you&rsquo;d complain to a colleague. Don&rsquo;t propose a fix. Then send it and see what Claude does with it.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Expect Claude to push past the symptom</h4>
+      <p>The thing that hurts most is rarely the real problem. You describe the slow part; Claude often diagnoses the <em>structural</em> cause underneath it &mdash; sometimes proposing a process change instead of a tool. That redirect is the value, not a misunderstanding. Welcome it. (This is Toyota&rsquo;s old &ldquo;5 Whys&rdquo; discipline: keep asking <em>why</em> until the cause behind the symptom appears.)</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Everyday friction vs. the big ones</h4>
+      <p>For an everyday bottleneck, describe-and-iterate is enough &mdash; that&rsquo;s what we just did. For something larger, like rebuilding a whole workflow, there&rsquo;s a heavier, step-by-step method worth following. That&rsquo;s the next block.</p>
+    </div>
+
+    <div class="callout">
+      <h4>And know when Claude isn&rsquo;t the right tool</h4>
+      <p>Heavy statistical work with survey weights? Use a real stats package with Claude as your support analyst. Rendering images? That&rsquo;s the next block. The skill is knowing when Claude is the <em>executor</em> versus when it&rsquo;s the <em>guide</em> pointing you to the right tool.</p>
+    </div>
+
+    <p style="font-family: var(--serif); font-style: italic; color: var(--teal); font-size: 17px; margin-top: 24px;">&ldquo;You don&rsquo;t need to know how to use Claude to complain to it.&rdquo; Tell it what&rsquo;s hard, what takes too long, what form you wish would die. That&rsquo;s the entire skill in one sentence.</p>
+  </section>
+
+  <!-- BLOCK 2 - METHOD FOR BIG PROBLEMS -->
+  <section class="module-section" id="m2">
+    <div class="module-number">2</div>
+    <h2>A Method for the Big Problems</h2>
+    <p class="principle">For an everyday task, a good prompt is enough. For a big one &mdash; rebuilding how something actually works &mdash; what you need isn&rsquo;t a smarter prompt. It&rsquo;s a disciplined process. Six steps.</p>
+
+    <p>Block 1 was the everyday move: describe the friction, let Claude shape an answer, iterate. That&rsquo;s plenty for most of your week. But some problems are bigger &mdash; rebuilding how Accord gathers and synthesizes data from 160+ member organizations, or rethinking the CRDA Journal pipeline end to end. For those, don&rsquo;t expect the first answer to be right, and <em>don&rsquo;t accept it.</em> Run it through a loop that forces research, refinement, and an outside opinion before you commit.</p>
+
+    <div class="step-box">
+      <div class="step-label">Step 1 &mdash; Describe the friction</div>
+      <p>Friction-shaped, no solution &mdash; exactly like Block 1. Start from what&rsquo;s hard, not from a tool you&rsquo;ve already imagined.</p>
+    </div>
+    <div class="step-box">
+      <div class="step-label">Step 2 &mdash; Let Claude propose &mdash; but don&rsquo;t accept it yet</div>
+      <p>The first proposal is a starting point, not the answer. Read it, then hold it loosely. The work is just beginning.</p>
+    </div>
+    <div class="step-box">
+      <div class="step-label">Step 3 &mdash; Send Claude to research the field</div>
+      <p>This is the step most people skip. Have Claude go and actually read the world &mdash; current standards, what peer networks do, what the field considers best practice &mdash; before it commits to anything.</p>
+    </div>
+
+    <div class="prompt-box">Before you finalize a recommendation, go research this properly. Read what&rsquo;s current and standard in the relief-and-development field, look at how comparable networks handle it, and cite your sources. Then come back and tell me what you learned and how it changes your proposal.</div>
+
+    <div class="step-box">
+      <div class="step-label">Step 4 &mdash; Have Claude refine its proposal</div>
+      <p>Now that it has read the field, ask it to rebuild the recommendation in light of what it just learned. The second version is almost always materially better than the first.</p>
+    </div>
+    <div class="step-box">
+      <div class="step-label">Step 5 &mdash; Get an outside critique</div>
+      <p>Take the refined proposal to a <em>different</em> AI &mdash; Gemini, ChatGPT, either. Ask it to find the flaws. Independent eyes catch what one model misses.</p>
+    </div>
+    <div class="step-box">
+      <div class="step-label">Step 6 &mdash; Finalize, then ask humans</div>
+      <p>Bring the critique back to Claude, have it onboard the feedback and produce a final version &mdash; then put it in front of your team. The AI sharpens the thinking; people still make the call.</p>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Why run it past a second AI?</h4>
+      <p>Different models notice different things. A second model sees the proposal with fresh eyes and flags what Claude was too close to catch. It&rsquo;s the AI version of asking a trusted colleague for a second opinion before you commit &mdash; cheap insurance on a decision that matters.</p>
+    </div>
+
+    <div class="callout">
+      <h4>When to reach for this</h4>
+      <p>Don&rsquo;t use the heavy loop on everyday friction &mdash; that&rsquo;s overkill, and Block 1&rsquo;s describe-and-iterate is faster. Save these six steps for the big, structural problems where getting it wrong is expensive: a new operating model, a major funder strategy, a process the whole network will depend on.</p>
+    </div>
+
+    <div class="step-box">
+      <div class="step-label">Try it &mdash; one real big problem</div>
+      <p>Pick one genuinely large thing on your plate at Accord. In your project, run it through all six steps in a single sitting. Notice how different the Step 4 answer is from the Step 2 answer &mdash; that gap is the research doing its work.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 3 - TOOL COMBINATION -->
+  <section class="module-section" id="m3">
+    <div class="module-number">3</div>
+    <h2>Use the Right Tool &mdash; and Combine Them</h2>
+    <p class="principle">The best output doesn&rsquo;t come from forcing one tool to do everything. It comes from giving each tool the job it&rsquo;s best at. The tool that <em>thinks</em> about the output and the tool that <em>renders</em> it don&rsquo;t have to be the same tool.</p>
+
+    <p>Claude is a <strong>language model</strong> &mdash; it thinks in words, not pixels. It can describe exactly what an image should look like, down to composition, color, and mood. But turning that description into an actual image takes a different kind of model. That&rsquo;s not a weakness; it&rsquo;s a division of labor.</p>
+
+    <h3>The pattern: Claude designs, another tool renders</h3>
+    <table class="data-table">
+      <tr><th>Role</th><th>Tool</th><th>What it does</th></tr>
+      <tr><td><strong>Director</strong></td><td>Claude</td><td>Designs the structure, writes the image prompts, assembles the final product</td></tr>
+      <tr><td><strong>Image creator</strong></td><td>Gemini (or ChatGPT)</td><td>Generates high-quality images from Claude&rsquo;s descriptions</td></tr>
+      <tr><td><strong>Assembler</strong></td><td>Claude</td><td>Takes the finished images and builds the polished deliverable</td></tr>
+    </table>
+
+    <div class="step-box">
+      <div class="step-label">Try it &mdash; a visual on Accord&rsquo;s Principles</div>
+      <p>In your Accord project, paste:</p>
+    </div>
+
+    <div class="prompt-box">I need a 4-slide visual overview of the Accord Network&rsquo;s Principles of Practice. For each slide, give me: the slide title, the key message in 1&ndash;2 sentences, and a detailed image description I can paste into an image AI to generate the visual. Give me the image descriptions as separate blocks I can copy one at a time.</div>
+
+    <p>Take each image description to <strong>gemini.google.com</strong> &rarr; &ldquo;Create an image,&rdquo; paste, download. (Tip: after you get an image you like, tell Gemini &ldquo;in the same style&rdquo; for the next one &mdash; that keeps your visuals consistent.) Then drag the images back into Claude: &ldquo;Take these, add them to the overview, and finalize it for me.&rdquo;</p>
+
+    <div class="callout-gold">
+      <h4>Iterate in text, build once</h4>
+      <p>Here&rsquo;s the trap: <strong>Claude can build a file bigger than it can read back</strong> &mdash; like a printer that prints a 500-page book but only has a 50-page scanner. A finished presentation with embedded images can eat 60&ndash;70% of the context window, so editing it over and over burns through your room fast. The fix: get all your <em>content</em> right in plain text first, <em>then</em> generate the finished deliverable once. It&rsquo;ll be close to right on the first build.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Why this matters beyond images</h4>
+      <p>The same principle applies to any format-heavy job &mdash; a brand-perfect slide deck, a complex spreadsheet, a long formatted report. Asking Claude to render <em>and</em> perfect the format in one pass means dozens of tool calls and a degrading context window, and the output drifts &mdash; silently. Let Claude structure the <strong>content</strong>; let a tool built for the format handle the <strong>rendering</strong>. Design the handoff between them. That&rsquo;s the skill that compounds.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 4 - WHY COWORK (CENTERPIECE) -->
+  <section class="module-section" id="m4">
+    <div class="module-number">4</div>
+    <h2>Why Cowork: Hand Off the Whole Task</h2>
+    <p class="principle">Everything so far has been AI-<em>assisted</em> work: you ask, Claude answers, you go do it. Cowork is the first step into AI-<em>completed</em> work &mdash; you give a goal, it makes a plan, it does the in-between, it reports back.</p>
+
+    <div class="callout">
+      <h4>First, plainly: what is Cowork?</h4>
+      <p>Cowork is a <strong>mode inside the Claude desktop app</strong> &mdash; included in your Accord Teams plan, nothing extra to buy. It&rsquo;s the same Claude you&rsquo;ve been using in the browser, but with permission to actually <em>do</em> the work on your computer: open and organize files, fill in spreadsheets, draft into Gmail, work across a whole folder. Chat <em>tells you how</em>; Cowork <em>goes and does it</em>. (The desktop app also has a Code mode for developers &mdash; not today.)</p>
+    </div>
+
+    <p>The simplest definition of an agent: <strong>a coworker you hand a task to.</strong> &ldquo;Agentic&rdquo; just means the AI does the work &mdash; not only tells you how to do it yourself. The non-technical anchor is an intern who has read everything on the internet, never sleeps, and does the boring middle part for you. You still say what you want. You still review the work. They just do the in-between.</p>
+
+    <h3>Three things that make something an agent</h3>
+    <ul>
+      <li><strong>It plans before acting.</strong> It looks at your goal, figures out the steps, and shows you the plan before it touches anything. If the plan is wrong, you stop it before any damage is done.</li>
+      <li><strong>It uses tools.</strong> It reads your files, browses the web, drafts emails, fills spreadsheets &mdash; the same things you do with a mouse and keyboard. That&rsquo;s the difference between <em>describing</em> a deliverable and <em>producing</em> one.</li>
+      <li><strong>It works in steps and reports back.</strong> Not one answer in one go. Step by step, and at any point you can say &ldquo;stop,&rdquo; &ldquo;redo that,&rdquo; or &ldquo;keep going.&rdquo;</li>
+    </ul>
+
+    <h3>Every Cowork task runs on the same four beats</h3>
+    <div class="loop-grid">
+      <div class="loop-beat"><div class="beat-num">Beat 1</div><h4>Goal</h4><p>You describe the outcome in plain English. Not the steps &mdash; the result.</p></div>
+      <div class="loop-beat"><div class="beat-num">Beat 2</div><h4>Plan</h4><p>Cowork shows what it&rsquo;s about to do. You approve, edit, or cancel.</p></div>
+      <div class="loop-beat"><div class="beat-num">Beat 3</div><h4>Work</h4><p>Cowork executes. You watch, walk away, or interrupt.</p></div>
+      <div class="loop-beat"><div class="beat-num">Beat 4</div><h4>Deliverable</h4><p>It hands back the result. You review, accept, or send it back.</p></div>
+    </div>
+    <p>Your judgment lives at three points: the <strong>goal</strong> (what do you actually want?), the <strong>plan approval</strong> (will this touch the right things?), and the <strong>deliverable review</strong> (is this correct? anything missing?). You&rsquo;re not being replaced &mdash; you&rsquo;re being relieved of the in-between.</p>
+
+    <h3>Goal, not instruction</h3>
+    <div class="compare">
+      <div class="compare-box weak">
+        <div class="label">&#10007; Instruction-shaped</div>
+        &ldquo;First open the folder. Then read each file&rsquo;s date. Then sort by month. Then create subfolders. Then move the files. Don&rsquo;t touch the videos.&rdquo;
+        <br><br>If you forget a step, you find out when the deliverable is wrong.
+      </div>
+      <div class="compare-box strong">
+        <div class="label">&#10003; Goal-shaped</div>
+        &ldquo;Sort this folder into subfolders by month. Leave videos in place.&rdquo;
+        <br><br>Cowork makes the plan and shows it to you &mdash; you catch its assumptions <em>before</em> any file moves.
+      </div>
+    </div>
+    <p>Sort. Turn. Triage. You&rsquo;ll be surprised how good the result is from a short prompt. The same shape works for real Accord work: <em>&ldquo;Draft twelve versions of this member announcement, one per recipient, customized to each org&rsquo;s focus, and leave them in my drafts.&rdquo;</em> Goal in, twelve drafts out.</p>
+
+    <div class="callout-gold">
+      <h4>The memory flywheel &mdash; the sentence that turns one win into a habit</h4>
+      <p>When a Cowork task goes well and you want it to happen the same way next time, <strong>say so explicitly</strong>: &ldquo;Make sure we do it this way every time,&rdquo; or &ldquo;Remember this.&rdquo; Cowork doesn&rsquo;t reliably save to memory on its own &mdash; you have to enforce it the first few times. Once you do, it stops reinventing the approach and reuses the one you approved. That&rsquo;s the flywheel.</p>
+    </div>
+
+    <div class="callout">
+      <h4>The safety floor: the default is nothing</h4>
+      <p>Cowork can only see what you&rsquo;ve explicitly let it see &mdash; every folder is a separate grant; it cannot wander your machine. And it won&rsquo;t <em>send</em> an email or unsubscribe you from a list on its own. It drafts; you send. Keep it that way.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Put it on a schedule</h4>
+      <p>Anything you can ask Cowork to do once, you can ask it to do on a schedule &mdash; a Monday-morning brief of your week&rsquo;s member calls, a weekly folder cleanup. One catch, worth knowing: scheduled tasks only run when your computer is <strong>on, awake, and Claude is open</strong>. Turn on the Keep-Awake setting in the schedule pane so a 6 a.m. job actually fires.</p>
+    </div>
+  </section>
+
+  <!-- BLOCK 5 - KEEP IT CLEAN -->
+  <section class="module-section" id="m5">
+    <div class="module-number">5</div>
+    <h2>Keep a Clean Workshop: Canonical Docs &amp; Memory</h2>
+    <p class="principle">Now that Claude is creating real files for you, two things keep it from becoming a mess: knowing where the <em>true</em> version of a document lives, and knowing what Claude actually remembers.</p>
+
+    <h3>Canonical documents &mdash; one true version</h3>
+    <p>&ldquo;Canonical&rdquo; means the one authoritative, current version everything else refers back to &mdash; like the canon of Scripture, or the official version of any text. The risk, now that you&rsquo;re all working faster: a draft gets downloaded, edited locally, and never makes it back. Over weeks you end up with <strong>two versions of the truth</strong> &mdash; the one in your shared drive and the one on someone&rsquo;s laptop. That&rsquo;s <em>drift</em>, and it&rsquo;s the thing to prevent.</p>
+
+    <table class="data-table">
+      <tr><th>#</th><th>Habit</th><th>When to use it</th></tr>
+      <tr><td>1</td><td><strong>Don&rsquo;t download in the first place.</strong> Work in your shared drive; Claude&rsquo;s connector reads it directly.</td><td>Anything cloud-native (Google Docs/Sheets/Slides). Drift is impossible if no copy ever leaves.</td></tr>
+      <tr><td>2</td><td><strong>Ask Cowork to save it back.</strong> One sentence: &ldquo;Save this to the shared drive in the [folder name] folder.&rdquo;</td><td>Files Cowork just created locally. Use the same folder the source materials came from.</td></tr>
+    </table>
+
+    <div class="callout">
+      <h4>One honest limitation</h4>
+      <p>Claude&rsquo;s Drive connector can <strong>read, copy, and create</strong> &mdash; but it can&rsquo;t move, rename, or delete. If you&rsquo;re updating an existing canonical file, it uploads a new version next to the old one; swapping them is a quick manual step in Drive. The principle holds: your job is to say what good looks like and let the workflow do the housekeeping.</p>
+    </div>
+
+    <h3>What Claude actually remembers</h3>
+    <p>Memory is a <strong>place, not a magic property</strong>. If it wasn&rsquo;t written down somewhere, Claude doesn&rsquo;t have it. And memory in one product does <em>not</em> cross into another &mdash; this one rule prevents most of the confusion.</p>
+
+    <div class="mem-silos">
+      <div class="mem-silo"><h5>Claude.ai<br>(web)</h5><span class="pill yes">Remembers</span></div>
+      <div class="mem-divide"><div class="x">&#10007;</div><span>no cross</span></div>
+      <div class="mem-silo"><h5>Cowork<br>standalone task</h5><span class="pill no">Forgets</span></div>
+      <div class="mem-divide"><div class="x">&#10007;</div><span>no cross</span></div>
+      <div class="mem-silo"><h5>Cowork<br>inside a project</h5><span class="pill yes">Remembers</span></div>
+    </div>
+    <p class="silo-caption">Three separate buckets &mdash; what&rsquo;s saved in one never reaches another.</p>
+
+    <table class="data-table">
+      <tr><th>Where you&rsquo;re working</th><th>What it remembers across sessions</th></tr>
+      <tr><td><strong>Claude.ai (web)</strong></td><td>An auto-summary of past chats, plus anything you save yourself. The richest persistent memory.</td></tr>
+      <tr><td><strong>Cowork &mdash; standalone task</strong></td><td><strong>Nothing.</strong> Each task starts fresh and forgets when it closes.</td></tr>
+      <tr><td><strong>Cowork &mdash; inside a Project</strong></td><td>Topic-by-topic memory plus skills, carried across sessions. The sweet spot.</td></tr>
+    </table>
+
+    <div class="callout-gold">
+      <h4>One project to rule them all</h4>
+      <p>If you want Cowork to remember an area of your work, do that work inside <strong>one Cowork project</strong> &mdash; not scattered standalone tasks. The trade-off in one line: <em>less memory, more power; more memory, less power.</em> A Cowork project is the balance point &mdash; most of the persistent memory of Claude.ai, plus the extra power of Cowork. Pick the project and stay in it.</p>
+    </div>
+
+    <div class="callout">
+      <h4>Three always-on layers you can set</h4>
+      <p>Separate from per-session memory, three layers of standing context load every time, broadest to narrowest: <strong>(1) your Claude.ai Profile instructions</strong> (Settings &rarr; General &mdash; who you are, your role, your output style); <strong>(2) Cowork Global Instructions</strong> (conventions that apply everywhere in Cowork &mdash; your team roster, defaults); <strong>(3) Project Instructions</strong> (rules for one project only, e.g. &ldquo;treat everything here as confidential&rdquo;). And note: your <em>Instructions</em> box is what you tell Claude; <em>Memory</em> is separate &mdash; it&rsquo;s what Claude learns about you on its own. Make sure memory is turned on under Settings &rarr; Capabilities.</p>
+    </div>
+  </section>
+
+  <!-- TAKEAWAYS -->
+  <section class="module-section" id="takeaways">
+    <div class="module-number">&#10003;</div>
+    <h2>The Through-Line</h2>
+    <p class="principle">Five blocks, one skill seen from five angles: you own the outcome &mdash; the AI handles the in-between.</p>
+
+    <table class="data-table">
+      <tr><th>Block</th><th>The habit</th><th>What you own</th></tr>
+      <tr><td>1 &mdash; Friction</td><td>Describe what&rsquo;s hard; don&rsquo;t prescribe the fix</td><td>The problem</td></tr>
+      <tr><td>2 &mdash; Big problems</td><td>Describe &rarr; propose &rarr; research &rarr; refine &rarr; outside critique &rarr; finalize</td><td>The method</td></tr>
+      <tr><td>3 &mdash; Combine tools</td><td>Right tool for each job; design the handoff</td><td>The workflow</td></tr>
+      <tr><td>4 &mdash; Cowork</td><td>Goal in, deliverable out; the AI does the middle</td><td>The outcome</td></tr>
+      <tr><td>5 &mdash; Keep it clean</td><td>Canonical docs, dependable memory, one project</td><td>The system</td></tr>
+    </table>
+
+    <div class="takeaway-grid">
+      <div class="takeaway-card">
+        <h4>Complain, don&rsquo;t prescribe</h4>
+        <p>The most powerful prompt is an honest description of what&rsquo;s slow. Let Claude diagnose past the symptom.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Big problems get the full loop</h4>
+        <p>Don&rsquo;t accept the first proposal. Make Claude research, refine, and survive an outside AI&rsquo;s critique before you commit.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Combine, don&rsquo;t force</h4>
+        <p>Claude designs, another tool renders. Iterate in text, build once &mdash; Claude can make files bigger than it can re-read.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Hand off the whole task</h4>
+        <p>Goal, not instruction. Approve the plan, review the deliverable. &ldquo;Do it this way every time&rdquo; builds the flywheel.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>Keep one source of truth</h4>
+        <p>Save work back to the shared drive. Don&rsquo;t let the laptop copy become the real one.</p>
+      </div>
+      <div class="takeaway-card">
+        <h4>One project to rule them all</h4>
+        <p>Memory lives in a place. For an area you care about, stay in one Cowork project so it remembers.</p>
+      </div>
+    </div>
+
+    <div class="callout-gold">
+      <h4>Your challenge this week</h4>
+      <p>Pick <strong>one</strong> recurring chore &mdash; sorting a folder of member files, drafting a batch of personalized emails, building a Monday brief of your week &mdash; and hand it to Cowork inside your Accord project. When it works, tell it to remember. When it produces a file, save it back to your shared drive. That&rsquo;s the whole discipline: tell a good coworker what good looks like, review the work, keep the workshop clean.</p>
+    </div>
+
+    <p style="font-family: var(--serif); font-style: italic; color: var(--teal); font-size: 17px; margin-top: 24px;">You&rsquo;re not learning to be an AI engineer. You&rsquo;re learning to keep a clean workshop &mdash; and everything else is the same skill you already have: telling a good coworker what good looks like.</p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <p><strong>Hope Rises International</strong> &mdash; Claude Workshop curriculum, prepared for the Accord Network</p>
+  <p style="margin-top: 8px; font-size: 13px;">90-Minute Workshop · Part 2 · Facilitated live</p>
+</footer>
+
+</body>
+</html>
